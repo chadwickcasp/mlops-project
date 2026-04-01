@@ -1,0 +1,7 @@
+# Pin versions aligned with a known-good local env (see image_segmentation/README.md).
+ultralytics==8.4.32
+matplotlib==3.10.8
+numpy>=1.23
+opencv-python>=4.8.0
+torch>=2.0
+torchvision>=0.15
