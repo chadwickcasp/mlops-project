@@ -80,6 +80,3 @@ Matplotlib needs a display for the interactive window. On a headless machine, us
 - **Labeling backend** feeding a separate object-detection (e.g. YOLO) training loop.
 - On-device inference validation is a later acceptance step.
 
-## Interview line
-
-*“I sandboxed Mobile SAM behind a reusable `segment_with_points` wrapper and a matplotlib click tool that logs prompts and overlays for qualitative review—same API shape I’d use for tap-to-segment on mobile later.”*
