@@ -1,4 +1,4 @@
-# Computer Vision Nature and Scavenger Hunt
+# Computer Vision Nature Scavenger Hunt
 An application to primarily test skills learned during the MLOps Zoomcamp course. It's also an attempt to make something interesting, fun, and potentially useful for people to use.
 
 Installation and usage details to follow soon...
