@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import sys
+import textwrap
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,13 +37,30 @@ DRAG_START: tuple[float, float] | None = None
 DRAG_PATCH = None
 
 FIG = None
+FOOTER_AX = None
 AX = None
 DISP = None
 TRAY_AX = None
 TRAY_DISP = None
 SAVED_PNGS: list[Path] = []
-META_TEXT = None
+FOOTER_TEXT = None
 WARN_TEXT = None
+
+# Right-flush strip inside the footer cell (same column as the image).
+_FOOTER_STRIP_FRAC = 0.88
+_INFO_WRAP_WIDTH = 88
+
+
+def _wrap_info_lines(lines: list[str], width: int = _INFO_WRAP_WIDTH) -> str:
+    """Wrap each logical line for the footer strip under the image."""
+    out: list[str] = []
+    for line in lines:
+        if not line.strip():
+            out.append("")
+            continue
+        wrapped = textwrap.fill(line, width=width, break_long_words=True, break_on_hyphens=False)
+        out.append(wrapped)
+    return "\n".join(out)
 
 
 def _ratio_to_float(r) -> float:
@@ -163,13 +181,9 @@ def _refresh_title() -> None:
             mgr.set_window_title(f"Mobile SAM eval — {name} ({IDX + 1}/{len(PATHS)})")
         except Exception:
             pass
-    FIG.suptitle(
-        f"{name}  |  mode={'BOX' if BOX_MODE else 'POINT'}  |  left=foreground  right=background  "
-        "b=toggle_box  s=save  r=reset  n=next  p=prev  d=del_point  backspace=del_box  q=quit",
-        fontsize=10,
-    )
+    FIG.suptitle(f"{name}  |  mode={'BOX' if BOX_MODE else 'POINT'}", fontsize=11)
 
-    if META_TEXT is not None:
+    if FOOTER_TEXT is not None:
         gps = _get_exif_gps_lat_lon(PATHS[IDX])
         if gps is None:
             gps_txt = "gps: none"
@@ -177,15 +191,18 @@ def _refresh_title() -> None:
             lat, lon = gps
             gps_txt = f"gps: {lat:.6f}, {lon:.6f}"
         total_prompt_pts = len(POINTS) + 4 * len(BOXES)
-        META_TEXT.set_text(
-            "\n".join(
-                [
-                    f"image: {name}",
-                    gps_txt,
-                    f"points: {len(POINTS)}  boxes: {len(BOXES)}  total_prompt_points: {total_prompt_pts}",
-                ]
-            )
+        legend_raw = (
+            "left-click: object pt | right-click: background pt\n"
+            "b: box mode | s: save | r: reset | n/p: next/prev\n"
+            "d: del pt | backspace: del box | q: quit"
         )
+        legend_lines = [ln.strip() for ln in legend_raw.splitlines() if ln.strip()]
+        image_block = "IMAGE INFO:\n" + _wrap_info_lines([f"image: {name}", gps_txt])
+        seg_block = "SEG INFO:\n" + _wrap_info_lines(
+            [f"points: {len(POINTS)}  boxes: {len(BOXES)}  total_prompt_points: {total_prompt_pts}"]
+        )
+        actions_block = "ACTIONS:\n" + _wrap_info_lines(legend_lines)
+        FOOTER_TEXT.set_text(f"{image_block}\n\n{seg_block}\n\n{actions_block}")
 
     if WARN_TEXT is not None:
         total_prompt_pts = len(POINTS) + 4 * len(BOXES)
@@ -231,40 +248,57 @@ def _show() -> None:
 
 
 def _update_tray() -> None:
-    """Show a simple strip of the most recent saved overlays."""
+    """Show a right-side vertical queue of recent saved overlays."""
     assert FIG is not None
     if TRAY_DISP is None:
         return
     if not SAVED_PNGS:
-        TRAY_DISP.set_data(np.zeros((1, 1, 3), dtype=np.uint8))
+        empty = np.zeros((120, 140, 3), dtype=np.uint8)
+        TRAY_DISP.set_data(empty)
+        TRAY_DISP.set_extent((0, 140, 120, 0))
+        TRAY_AX.set_xlim(0, 140)
+        TRAY_AX.set_ylim(120, 0)
+        TRAY_AX.set_aspect("equal", adjustable="box")
         FIG.canvas.draw_idle()
         return
 
     thumbs: list[np.ndarray] = []
-    for p in SAVED_PNGS[-5:]:
+    # Show newest first in a vertical queue.
+    for p in reversed(SAVED_PNGS[-6:]):
         im = cv2.imread(str(p))
         if im is None:
             continue
         im_rgb = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
         h, w = im_rgb.shape[:2]
-        target_h = 90
-        new_w = max(1, int(round(w * (target_h / max(1, h)))))
-        thumbs.append(cv2.resize(im_rgb, (new_w, target_h), interpolation=cv2.INTER_AREA))
+        target_w = 140
+        new_h = max(1, int(round(h * (target_w / max(1, w)))))
+        thumbs.append(cv2.resize(im_rgb, (target_w, new_h), interpolation=cv2.INTER_AREA))
 
     if not thumbs:
-        TRAY_DISP.set_data(np.zeros((1, 1, 3), dtype=np.uint8))
+        empty = np.zeros((120, 140, 3), dtype=np.uint8)
+        TRAY_DISP.set_data(empty)
+        TRAY_DISP.set_extent((0, 140, 120, 0))
+        TRAY_AX.set_xlim(0, 140)
+        TRAY_AX.set_ylim(120, 0)
+        TRAY_AX.set_aspect("equal", adjustable="box")
         FIG.canvas.draw_idle()
         return
 
     pad = 6
-    total_w = sum(t.shape[1] for t in thumbs) + pad * (len(thumbs) - 1)
-    canvas = np.zeros((thumbs[0].shape[0], total_w, 3), dtype=np.uint8)
-    x = 0
+    total_h = sum(t.shape[0] for t in thumbs) + pad * (len(thumbs) - 1)
+    canvas = np.zeros((total_h, thumbs[0].shape[1], 3), dtype=np.uint8)
+    y = 0
     for t in thumbs:
-        canvas[:, x : x + t.shape[1], :] = t
-        x += t.shape[1] + pad
+        canvas[y : y + t.shape[0], :, :] = t
+        y += t.shape[0] + pad
 
     TRAY_DISP.set_data(canvas)
+    # Preserve pixel aspect ratio (no vertical stretch in a tall tray axes).
+    h_c, w_c = canvas.shape[:2]
+    TRAY_DISP.set_extent((0, w_c, h_c, 0))
+    TRAY_AX.set_xlim(0, w_c)
+    TRAY_AX.set_ylim(h_c, 0)
+    TRAY_AX.set_aspect("equal", adjustable="box")
     FIG.canvas.draw_idle()
 
 
@@ -508,7 +542,7 @@ def on_key(event: KeyEvent) -> None:
 
 
 def main() -> None:
-    global CFG, MODEL, PATHS, FIG, AX, DISP, TRAY_AX, TRAY_DISP, META_TEXT, WARN_TEXT
+    global CFG, MODEL, PATHS, FIG, FOOTER_AX, AX, DISP, TRAY_AX, TRAY_DISP, FOOTER_TEXT, WARN_TEXT
     CFG = default_config()
     PATHS = list_test_images(CFG.test_images_dir)
     if not PATHS:
@@ -522,32 +556,63 @@ def main() -> None:
     MODEL = load_model(CFG.weights_path)
 
     FIG = plt.figure(figsize=(12, 9))
-    gs = GridSpec(2, 1, height_ratios=[8, 1], hspace=0.05)
-    AX = FIG.add_subplot(gs[0])
-    TRAY_AX = FIG.add_subplot(gs[1])
-    plt.subplots_adjust(top=0.93)
+    gs = GridSpec(
+        2,
+        2,
+        width_ratios=[5.15, 1.22],
+        height_ratios=[1, 0.32],
+        wspace=0.015,
+        hspace=0.035,
+    )
+    AX = FIG.add_subplot(gs[0, 0])
+    TRAY_AX = FIG.add_subplot(gs[0, 1])
+    FOOTER_AX = FIG.add_subplot(gs[1, 0])
+    plt.subplots_adjust(top=0.94, bottom=0.12)
     AX.set_axis_off()
     TRAY_AX.set_axis_off()
+    FOOTER_AX.set_navigate(False)
+    FOOTER_AX.set_clip_on(False)
+    FOOTER_AX.set_facecolor("none")
+    FOOTER_AX.patch.set_visible(False)
+    FOOTER_AX.set_xticks([])
+    FOOTER_AX.set_yticks([])
+    for _sp in FOOTER_AX.spines.values():
+        _sp.set_visible(False)
     _maybe_disable_toolbar()
-    META_TEXT = AX.text(
-        0.01,
-        0.01,
+    strip = FOOTER_AX.inset_axes(
+        (1.0 - _FOOTER_STRIP_FRAC, 0.0, _FOOTER_STRIP_FRAC, 1.0),
+        transform=FOOTER_AX.transAxes,
+    )
+    strip.set_navigate(False)
+    strip.set_clip_on(False)
+    strip.patch.set_clip_on(False)
+    strip.set_facecolor((0.11, 0.11, 0.11))
+    strip.patch.set_alpha(0.92)
+    strip.patch.set_edgecolor("none")
+    strip.set_xticks([])
+    strip.set_yticks([])
+    for _sp in strip.spines.values():
+        _sp.set_visible(False)
+    FOOTER_TEXT = strip.text(
+        0.03,
+        0.98,
         "",
-        transform=AX.transAxes,
+        transform=strip.transAxes,
         ha="left",
-        va="bottom",
-        fontsize=8,
+        va="top",
+        fontsize=9,
+        linespacing=1.12,
         color="white",
-        bbox=dict(boxstyle="round,pad=0.25", facecolor="black", alpha=0.55, edgecolor="none"),
+        clip_on=False,
     )
     WARN_TEXT = AX.text(
         0.5,
-        0.98,
+        0.96,
         "",
         transform=AX.transAxes,
         ha="center",
         va="top",
-        fontsize=16,
+        fontsize=18,
         color="yellow",
         bbox=dict(boxstyle="round,pad=0.35", facecolor="red", alpha=0.6, edgecolor="none"),
         visible=False,
@@ -563,7 +628,17 @@ def main() -> None:
         origin="upper",
     )
     _sync_axes_to_image()
-    TRAY_DISP = TRAY_AX.imshow(np.zeros((1, 1, 3), dtype=np.uint8), aspect="auto", interpolation="nearest")
+    TRAY_AX.set_title("Saved queue", fontsize=10, loc="left")
+    TRAY_DISP = TRAY_AX.imshow(
+        np.zeros((120, 140, 3), dtype=np.uint8),
+        aspect="equal",
+        interpolation="nearest",
+        origin="upper",
+    )
+    TRAY_AX.set_aspect("equal", adjustable="box")
+    # Hug the gutter: image toward the tray column, tray toward the image column.
+    AX.set_anchor("E")
+    TRAY_AX.set_anchor("W")
 
     FIG.canvas.mpl_connect("button_press_event", on_click)
     FIG.canvas.mpl_connect("button_press_event", on_press)

@@ -38,11 +38,28 @@ python scripts/evaluate_image_segmentation.py
 - **backspace**: delete last box  
 - **q**: quit  
 
+The window places the **interactive image** on the **left** (wider column) and a narrow **saved queue** on the **right**, with a small gap; each is anchored toward that gap (image right-aligned in its cell, tray left-aligned in its). **File metadata and action hints** are one **right-flush** panel under the image column (**IMAGE INFO:** / **SEG INFO:** / **ACTIONS:** in a single text block), implemented as a simple Matplotlib inset on the footer axes—no extra figure-level axes or draw/resize layout hooks.
+
+### How point and box prompts interact
+
+- A box prompt is always **positive** and defines a region to segment.
+- If one or more boxes exist, inference runs **per box** and unions the results.
+- Points **inside a box** (both positive and negative) refine that box’s mask.
+- Points **outside all boxes** are assigned to the **nearest box** using distance to the box x/y limits.
+- Positive points add support for foreground; negative points help carve out over-segmented areas.
+- If no boxes exist, inference falls back to point-only prompting.
+
 Each save writes `<image_stem>_<utc_timestamp>.png` and a sidecar `.json` with points, labels, paths, and library versions.
 
 The bottom “tray” shows a strip of your most recent saved overlays so you can quickly confirm what got written without leaving the app.
 
-The overlay also shows how many prompt points you’ve added. Boxes count as **4 prompt points** each. If total prompt points exceed **48**, a large warning appears.
+The overlay also shows how many prompt points you’ve added. Boxes count as **4 prompt points** each. If total prompt points exceed **48**, a large warning appears to warn you that the number of prompts may start to impact performance.
+
+### Reference example (source vs segmented overlay)
+
+| Source image | Segmented overlay in GUI |
+|---|---|
+| ![Flower source](reference/flower_source.jpg) | ![Flower segmented overlay](reference/flower_segmented-w-overlay.png) |
 
 ### Environment overrides (optional)
 

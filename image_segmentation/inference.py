@@ -38,9 +38,28 @@ def segment_with_prompts(
     conf: float = 0.0,
     device: str | int | None = None,
 ) -> np.ndarray | None:
-    """Run prompted segmentation. Points are ``(x, y)`` in pixel coords; labels ``1``=foreground, ``0``=background.
+    """
+    Run prompted segmentation using point and/or bounding box prompts.
 
-    Returns a boolean ``(H, W)`` mask aligned with ``image_bgr``, or ``None`` if there are no prompts yet.
+    Args:
+        model: The Mobile SAM model instance.
+        image_bgr: Input image as a BGR NumPy array.
+        points: List of (x, y) point coordinates, in image (pixel) coordinates.
+        labels: List of integer labels for each point: 1 = foreground, 0 = background.
+        bboxes_xyxy: Optional list of bounding boxes, where each box is a tuple (x1, y1, x2, y2)
+            corresponding to top-left and bottom-right pixel corners in (x, y) order.
+            When provided, the function assigns each point to a box (if inside, or to
+            the nearest box if outside) and refines the mask for each box accordingly.
+        imgsz: Inference resolution.
+        conf: Confidence threshold for the model.
+        device: Device identifier for inference (e.g., "cpu", "cuda:0", etc.).
+
+    Returns:
+        A boolean (H, W) mask aligned with image_bgr, or None if no prompts are provided.
+
+    If both points and bounding boxes are provided, each box will be segmented using the
+    points inside it and points outside all boxes are assigned to the nearest box for refinement.
+    If only points are given, a single mask is produced using all points.
     """
     if len(points) != len(labels):
         raise ValueError("points and labels must have the same length")

@@ -34,8 +34,8 @@ def draw_click_markers(
     points: list[tuple[float, float]],
     labels: list[int],
     *,
-    radius: int = 8,
-    thickness: int = 2,
+    radius: int = 10,
+    thickness: int = 3,
     annotate_last: bool = True,
 ) -> np.ndarray:
     """Draw positive (green) and negative (red) click markers."""
@@ -44,18 +44,18 @@ def draw_click_markers(
         cx, cy = int(round(x)), int(round(y))
         col = (0, 255, 0) if lab == 1 else (0, 0, 255)
         cv2.circle(vis, (cx, cy), radius, col, thickness, lineType=cv2.LINE_AA)
-        cv2.circle(vis, (cx, cy), 2, (255, 255, 255), -1, lineType=cv2.LINE_AA)
+        cv2.circle(vis, (cx, cy), 3, (255, 255, 255), -1, lineType=cv2.LINE_AA)
     if annotate_last and points:
         lx, ly = points[-1]
         cx, cy = int(round(lx)), int(round(ly))
         cv2.putText(
             vis,
             "last pt",
-            (cx + 6, cy - 6),
+            (cx + 8, cy - 8),
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.9,
+            1.05,
             (0, 255, 0),
-            2,
+            3,
             lineType=cv2.LINE_AA,
         )
     return vis
@@ -66,7 +66,7 @@ def draw_boxes(
     boxes_xyxy: list[tuple[float, float, float, float]],
     *,
     color_bgr: tuple[int, int, int] = (0, 255, 0),
-    thickness: int = 2,
+    thickness: int = 3,
     annotate_last: bool = True,
 ) -> np.ndarray:
     """Draw thin wireframe rectangles for positive box prompts."""
@@ -77,15 +77,15 @@ def draw_boxes(
         cv2.rectangle(vis, p1, p2, color_bgr, thickness, lineType=cv2.LINE_AA)
     if annotate_last and boxes_xyxy:
         x1, y1, x2, y2 = boxes_xyxy[-1]
-        p = (int(round(x1)) + 4, int(round(y1)) + 14)
+        p = (int(round(x1)) + 6, int(round(y1)) + 18)
         cv2.putText(
             vis,
             "last box",
             p,
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.9,
+            1.05,
             color_bgr,
-            2,
+            3,
             lineType=cv2.LINE_AA,
         )
     return vis
