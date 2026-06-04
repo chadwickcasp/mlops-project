@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import importlib.metadata
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+try:
+    import torch
+except ImportError:
+    torch = None  # type: ignore[assignment]
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tif", ".tiff"}
 
@@ -48,16 +54,12 @@ def build_run_metadata(
         "saved_at_utc": utc_timestamp(),
     }
     try:
-        import importlib.metadata
-
         meta["ultralytics_version"] = importlib.metadata.version("ultralytics")
     except (ImportError, ValueError):
         meta["ultralytics_version"] = None
-    try:
-        import torch
-
+    if torch is not None:
         meta["torch_version"] = torch.__version__
-    except ImportError:
+    else:
         meta["torch_version"] = None
     if extra:
         meta.update(extra)

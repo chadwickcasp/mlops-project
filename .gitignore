@@ -212,6 +212,9 @@ __marimo__/
 
 # Image segmentation: local weights and eval outputs (keep directory placeholders)
 models/image_segmentation/*.pt
+models/image_classification/*.pt
+models/image_classification/*.pth
+models/image_classification/*.bin
 outputs/image_segmentation/*
 !outputs/image_segmentation/.gitkeep
 

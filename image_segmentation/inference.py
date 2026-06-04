@@ -3,18 +3,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import numpy as np
-
-if TYPE_CHECKING:
-    from ultralytics import SAM
+from ultralytics import SAM
 
 
-def load_model(weights_path: str | Path) -> "SAM":
+def load_model(weights_path: str | Path) -> SAM:
     """Load SAM weights. Path must end with a known suffix (e.g. ``mobile_sam.pt``)."""
-    from ultralytics import SAM
-
     path = Path(weights_path)
     if not path.is_file():
         msg = (
