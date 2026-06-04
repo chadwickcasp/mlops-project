@@ -1,0 +1,14 @@
+---
+description: Keep docs, tradeoffs, and descriptions up to date.
+alwaysApply: false
+---
+- Treat docs as part of the implementation, not an afterthought.
+- For any meaningful feature or experiment change, update the nearest relevant doc.
+- Prefer concise, factual notes over marketing language.
+- Every substantial change should leave behind:
+  1. problem solved
+  2. chosen approach
+  3. rejected alternative if relevant
+  4. evidence / validation
+  5. limitation
+  6. next step

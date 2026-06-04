@@ -1,0 +1,22 @@
+---
+description: Rules for inference, API, app integration, and demo behavior.
+globs:
+  - "app/**/*.py"
+  - "api/**/*.py"
+  - "server/**/*.py"
+  - "src/**/inference*.py"
+  - "src/**/serve*.py"
+  - "frontend/**/*"
+alwaysApply: false
+---
+
+- Keep model code, evaluation code, and serving code separated.
+- Preserve request/response contracts unless explicitly changing them.
+- Prefer thin handlers and explicit schemas.
+- If adding an endpoint or UI behavior, define:
+  1. input contract
+  2. output contract
+  3. failure cases
+  4. demo path
+- When implementing a demo path, optimize for reliability and explainability over novelty.
+- Avoid hidden state and magic defaults in the demo flow.

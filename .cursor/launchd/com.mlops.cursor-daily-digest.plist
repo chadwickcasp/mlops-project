@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.mlops.cursor-daily-digest</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>REPO_ROOT_PLACEHOLDER/.cursor/hooks/daily_workflow_digest.py</string>
+    <string>--catch-up</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>6</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>REPO_ROOT_PLACEHOLDER/.cursor/workflow-review/launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>REPO_ROOT_PLACEHOLDER/.cursor/workflow-review/launchd.log</string>
+</dict>
+</plist>

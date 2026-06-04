@@ -1,0 +1,18 @@
+{
+  "directories": [
+    {
+      "id": "workflow_templates",
+      "label": "Workflow Templates",
+      "path": "/Users/chadcasper/Documents/Career and Work/Applied AI:RSE Workflow & Research/Workflow Templates",
+      "mode": "newest_dirs",
+      "limit": 3
+    },
+    {
+      "id": "automation_context",
+      "label": "Automation Context",
+      "path": "/Users/chadcasper/Documents/Career and Work/Applied AI:RSE Workflow & Research/Automation Context",
+      "mode": "named_files",
+      "files": ["preferences.md", "source-list.md"]
+    }
+  ]
+}

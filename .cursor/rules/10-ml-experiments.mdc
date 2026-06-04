@@ -1,0 +1,33 @@
+---
+description: Rules for training, evaluation, data processing, and experiment logic.
+globs:
+  - "src/**/*.py"
+  - "models/**/*.py"
+  - "training/**/*.py"
+  - "eval/**/*.py"
+  - "scripts/**/*.py"
+  - "notebooks/**/*.ipynb"
+  - "tests/**/*.py"
+alwaysApply: false
+---
+
+- Before editing ML-related code, state:
+  1. the hypothesis
+  2. which variable is changing
+  3. expected metric movement
+  4. likely failure modes
+- Prefer baselines before advanced approaches.
+- Do not silently change:
+  - train/val/test splits
+  - label semantics
+  - primary metrics
+  - preprocessing assumptions
+- Separate reusable logic from notebook-only exploration.
+- If modifying training or ML model evaluation code, update docs/experiment-log.md with:
+  - date
+  - hypothesis
+  - files changed
+  - metrics affected
+  - result summary
+- Keep experiment diffs narrow enough that I can attribute wins or losses.
+- Always keep a record of experiments run, data used, and results obtained.

@@ -1,0 +1,21 @@
+---
+description: Core workflow guardrails for this repo. Use for all tasks.
+globs:
+alwaysApply: true
+---
+
+- Start with understanding, not coding.
+- For any non-trivial task, propose a small plan before editing files.
+- Prefer one bounded task per session.
+- Keep diffs small and localized.
+- Do not make unrelated refactors.
+- If the task is unclear from repo context, inspect docs/feature-plan.md and docs/decision-log.md first.
+- If the conversation gets long or confused, suggest starting a fresh task thread.
+- **Workflow review:** daily digests in `.cursor/workflow-review/daily/`; weekly draft at `latest.md` (approval required before editing `AGENTS.md` or `.mdc`). Monday template ideas: `.cursor/workflow-suggestions/KICKOFF.md`.
+- End each substantial task with:
+  1. what changed
+  2. how it was verified
+  3. risks / follow-ups
+  4. what a future reader should understand about the change
+- Implementation of feature evaluation scripts, test scripts for possible new features, or other scripts that are not part of core functionality don't need to adhere to best practices or industry standards
+- Implementation of features, modules, scripts, and functions that are part of the core functionality of the application should adhere to best practices and industry standards for a given language, framework, or task.

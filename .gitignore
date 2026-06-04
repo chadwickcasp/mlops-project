@@ -198,12 +198,21 @@ cython_debug/
 #  Cursor is an AI-powered code editor. `.cursorignore` specifies files/directories to
 #  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data
 #  refer to https://docs.cursor.com/context/ignore-files
-.cursor/
 .cursorignore
 .cursorindexingignore
+# Cursor — commit rules, hooks, launchd, workflow docs; ignore ephemeral outputs
+.cursor/workflow-paths.json
+.cursor/workflow-review/daily/
+.cursor/workflow-review/latest.md
+.cursor/workflow-review/launchd.log
+.cursor/workflow-suggestions/queue.json
+.cursor/agent-workflow-state.json
+.cursor/debug*.log
+.cursor/debug.log
 agents/
-docs/
-AGENTS.md
+# Docs — track planning logs; keep personal prompts private
+docs/cursor-prompts.md
+docs/features/
 
 # Marimo
 marimo/_static/

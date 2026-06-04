@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Cursor Hooks",
+    "url": "https://cursor.com/docs/agent/hooks"
+  },
+  {
+    "title": "Cursor Rules",
+    "url": "https://cursor.com/docs/context/rules"
+  },
+  {
+    "title": "MLflow Tracking",
+    "url": "https://mlflow.org/docs/latest/tracking.html"
+  }
+]

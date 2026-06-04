@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "command": ".cursor/hooks/on-agent-stop.sh",
+        "loop_limit": 1
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": ".cursor/hooks/on-session-start.sh"
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": ".cursor/hooks/on-after-agent-response.sh"
+      }
+    ]
+  }
+}
